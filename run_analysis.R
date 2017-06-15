@@ -45,7 +45,7 @@ y2 <- merge(y, activities)
 data <- cbind(x2, y2["activity"])
 
 ## write first result data set to csv
-write.csv(data, "measurements_mean_std.txt")
+write.csv(data, "measurements_mean_std.csv")
 
 ## join subject ids
 data2 <- cbind(data, subject)
@@ -55,4 +55,4 @@ data2melt <- melt(data2, id=c("subject", "activity"))
 data3 <- dcast(data2melt, activity + subject ~ variable, mean)
 
 ## write second result data set to csv
-write.csv(data3, "activity_subject_means.txt")
+write.csv(data3, "activity_subject_means.csv")
