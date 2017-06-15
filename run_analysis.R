@@ -1,12 +1,12 @@
 library(reshape2)
 
 ## read X, y and subject data for both train and test datasets
-xtrain <- read.table("UCI HAR Dataset/train/X_train.txt")
-xtest <- read.table("UCI HAR Dataset/test/X_test.txt")
-ytrain <- read.table("UCI HAR Dataset/train/y_train.txt")
-ytest <- read.table("UCI HAR Dataset/test/y_test.txt")
-subjecttrain <- read.table("UCI HAR Dataset/train/subject_train.txt")
-subjecttest <- read.table("UCI HAR Dataset/test/subject_test.txt")
+xtrain <- read.table("c3data//UCI HAR Dataset/train/X_train.txt")
+xtest <- read.table("c3data//UCI HAR Dataset/test/X_test.txt")
+ytrain <- read.table("c3data//UCI HAR Dataset/train/y_train.txt")
+ytest <- read.table("c3data//UCI HAR Dataset/test/y_test.txt")
+subjecttrain <- read.table("c3data//UCI HAR Dataset/train/subject_train.txt")
+subjecttest <- read.table("c3data//UCI HAR Dataset/test/subject_test.txt")
 
 ## merge X, y and subject data for both train and test datasets, and remove the seperated data
 x <- rbind(xtrain, xtest)
@@ -21,7 +21,7 @@ subject <- rbind(subjecttrain, subjecttest)
 
 rm(subjecttrain, subjecttest)
 ## read in features descriptions
-features <- read.table("UCI HAR Dataset/features.txt")[,"V2"]
+features <- read.table("c3data//UCI HAR Dataset/features.txt")[,"V2"]
 
 ## set descriptive names for all columns in merged X, y and subject data
 colnames(x) <- features
@@ -35,7 +35,7 @@ exfeatures <- c(means, stds)
 x2 <- x[, exfeatures]
 
 ## read in activity descriptions
-activities <- read.table("UCI HAR Dataset/activity_labels.txt")
+activities <- read.table("c3data//UCI HAR Dataset/activity_labels.txt")
 colnames(activities) <- c("activity_id", "activity")
 
 ## join activity dataset with descriptive labels
