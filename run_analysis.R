@@ -1,58 +1,53 @@
 library(reshape2)
 
-## read X, y and subject data for both train and test datasets
-xtrain <- read.table("c3data//UCI HAR Dataset/train/X_train.txt")
-xtest <- read.table("c3data//UCI HAR Dataset/test/X_test.txt")
-ytrain <- read.table("c3data//UCI HAR Dataset/train/y_train.txt")
-ytest <- read.table("c3data//UCI HAR Dataset/test/y_test.txt")
-subjecttrain <- read.table("c3data//UCI HAR Dataset/train/subject_train.txt")
-subjecttest <- read.table("c3data//UCI HAR Dataset/test/subject_test.txt")
+# loading Activity Labels from activity_labels.txt
 
-## merge X, y and subject data for both train and test datasets, and remove the seperated data
-x <- rbind(xtrain, xtest)
+activity_label <- read.table("c3data//UCI HAR Dataset/activity_labels.txt")
 
-rm(xtrain, xtest)
+activity <- activity_label
 
-y <- rbind(ytrain, ytest)
+activity_label <- activity_label$V2
 
-rm(ytrain, ytest)
+# loading Feature from features.txt
 
-subject <- rbind(subjecttrain, subjecttest)
+features <- read.table("c3data//UCI HAR Dataset/features.txt")
+features <- features$V2
 
-rm(subjecttrain, subjecttest)
-## read in features descriptions
-features <- read.table("c3data//UCI HAR Dataset/features.txt")[,"V2"]
+# Extracting only features having mean() or std() in it and remove "-" and "()"
 
-## set descriptive names for all columns in merged X, y and subject data
-colnames(x) <- features
-colnames(y) <- "activity_id"
-colnames(subject) <- "subject"
+featuresWanted <- grep(".*mean.*|.*std.*", features)
 
-## select features containing measurements on the mean and standard deviation
-means <- grep("-mean\\(\\)", features, value=TRUE)
-stds <- grep("-std\\(\\)", features, value=TRUE)
-exfeatures <- c(means, stds)
-x2 <- x[, exfeatures]
+name <- features[featuresWanted]
+name <- gsub('-mean', 'Mean', featuresWanted)
+name <- gsub('-std', 'Std', featuresWanted)
+name <- gsub('[-()]', '', featuresWanted)
 
-## read in activity descriptions
-activities <- read.table("c3data//UCI HAR Dataset/activity_labels.txt")
-colnames(activities) <- c("activity_id", "activity")
+# Loading training datasets
+train_X <- read.table("c3data//UCI HAR Dataset/train/X_train.txt")[featuresWanted]
+train_Y <- read.table("c3data//UCI HAR Dataset/train/Y_train.txt")
+train_Subject <- read.table("c3data//UCI HAR Dataset/train/subject_train.txt")
+train <- cbind(train_Subject, train_Y, train_X)
 
-## join activity dataset with descriptive labels
-y2 <- merge(y, activities)
+# Loading testing datasets
+test_X <- read.table("c3data//UCI HAR Dataset/test/X_test.txt")[featuresWanted]
+test_Y <- read.table("c3data//UCI HAR Dataset/test/Y_test.txt")
+test_Subject <- read.table("c3data//UCI HAR Datasettest/test/subject_test.txt")
+test <- cbind(test_Subject, test_Y, test_X)
 
-## join measurements dataset with activity labels
-data <- cbind(x2, y2["activity"])
 
-## write first result data set to csv
-write.csv(data, "measurements_mean_std.txt")
+# merge datasets and add labels
+Combine <- rbind(train, test)
+colnames(Combine) <- c("subject", "activity", name)
 
-## join subject ids
-data2 <- cbind(data, subject)
+# Converting activity and subject into factor 
+
+Combine$activity <- factor(Combine$activity, levels = activity[,1], labels = activity[,2])
+Combine$subject <- as.factor(Combine$subject)
 
 ## summarize means per unique (activity, subject) pair 
-data2melt <- melt(data2, id=c("subject", "activity"))
-data3 <- dcast(data2melt, activity + subject ~ variable, mean)
 
-## write second result data set to csv
-write.csv(data3, "activity_subject_means.txt")
+Combine.melted <- melt(Combine, id = c("subject", "activity"))
+Combine.mean <- dcast(Combine.melted, subject + activity ~ variable, mean)
+
+# Writing to a text file
+write.table(Combine.mean, "tidy.txt", row.names = FALSE, quote = FALSE)
